@@ -4,6 +4,18 @@ require 'optparse'
 #ruby talkbox for mac os x
 #mRAK
 
+# global variables
+@prompt = '$ '
+@command = ''
+@user = `id -un`
+
+def intro
+	puts "Hi #{@user.strip}, I'm the #{$0} script.\n"
+	puts "*************************************"
+	puts "Welcome to Talkbox\n"
+	puts "type help to get started\n"
+end
+
 def input
 	# parse names and sayings into hash
 	@voices = Hash[*File.read('voices.txt').split(/# |\n/)]
@@ -18,10 +30,21 @@ def corral
 	end
 end
 
+def main
+	# main program loop
+	until @command == 'exit'
+		print @prompt
+		@command = STDIN.gets.chomp()
+
+		if @command == 'corral'
+			corral
+		end
+	end
+end
+
+intro
 input
-corral
-
-
+main
 
 #read volume amt from args if volume_amt = 10
 #set_volume = `osascript -e 'set volume #{volume_amt}'`
