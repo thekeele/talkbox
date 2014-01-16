@@ -8,6 +8,7 @@ require 'optparse'
 @prompt = '$ '
 @command = ''
 @user = `id -un`
+@colorful_language = ['fuck', 'shit', 'piss', 'cunt']
 
 def intro
 	puts "Hi #{@user.strip}, I'm the #{$0} script.\n"
@@ -48,6 +49,8 @@ def main
 			corral
 		when 'show voices'
 			show_voices
+		when *@colorful_language
+			print "Drink some run you sailor!\n"
 		when 'exit'
 			print "Thank you for using talkbox\n"
 		else
@@ -72,8 +75,5 @@ main
 #add flag for random
 #talkbox = `say "#{talk}" -v "#{voices[1]}"`
 #random_talkbox = `say "#{talk}" -v "#{random_voice}"`
-
-
-#drink some rum you sailor
 
 #talk like a [input]
