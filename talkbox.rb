@@ -30,14 +30,28 @@ def corral
 	end
 end
 
+def show_voices
+	# display all voices for the user
+	@voices.each do |name, saying|
+		print name.strip + "\n"
+	end
+end
+
 def main
 	# main program loop
 	until @command == 'exit'
 		print @prompt
 		@command = STDIN.gets.chomp()
 
-		if @command == 'corral'
+		case @command
+		when 'corral'
 			corral
+		when 'show voices'
+			show_voices
+		when 'exit'
+			print "Thank you for using talkbox\n"
+		else
+			print "Invalid Command: please type help\n"
 		end
 	end
 end
