@@ -1,25 +1,24 @@
-#!/usr/bin/env ruby
-require 'optparse'
-
 #ruby talkbox for mac os x
-#mRAK
+#mRAK on the attACK
 
 # global variables
-@prompt = '$ '
-@command = ''
 @user = `id -un`
-@colorful_language = ['fuck', 'shit', 'piss', 'cunt']
+@names = []
 
 def intro
 	puts "Hi #{@user.strip}, I'm the #{$0} script.\n"
 	puts "*************************************"
 	puts "Welcome to Talkbox\n"
-	puts "type help to get started\n"
+	puts "type 'help' to get started\n"
 end
 
 def input
 	# parse names and sayings into hash
 	@voices = Hash[*File.read('voices.txt').split(/# |\n/)]
+
+	@voices.each do |name, saying|
+		@names.push(name.strip)
+	end
 end
 
 def corral
@@ -39,41 +38,56 @@ def show_voices
 end
 
 def main
-	# main program loop
-	until @command == 'exit'
-		print @prompt
-		@command = STDIN.gets.chomp()
+	# variables
+	colorful_language = ['fuck', 'shit', 'piss', 'cunt']
+	command = ''
+	prompt = '$ '
+	name = 'Vicki'
+	volume_amt = `osascript -e 'set volume 5'`
 
-		case @command
+	# main program loop
+	until command == 'exit'
+		print prompt
+		command = STDIN.gets.chomp()
+
+		case command
+		when 'help' 
+			#must setup elaborate help case
+			puts 'Good luck with that buddy'
+		when /^set volume ([1-9]|10)$/
+			# ehh the comparsion is just fucked....
+			if command[/([1-9]|10)$/] >= volume_amt
+				volume_amt = command[/([1-9]|10)$/]
+				set_volume = `osascript -e 'set volume #{volume_amt}'`
+				talkbox = `say "louder" -v "#{name.strip}"`
+			else
+				volume_amt = command[/([1-9]|10)$/]
+				set_volume = `osascript -e 'set volume #{volume_amt}'`
+				talkbox = `say "softer" -v "#{name.strip}"`
+			end
+		# breaks shit, must be clever here
+		#when /^use [a-zA-Z]{1,12}$/
+			# must only allow valid names, sys command return is good
+			#name = command[/[a-zA-Z]{1,12}$/]
+			#talkbox = `say "#{name.strip}" -v "#{name.strip}"`
+		when 'use Random'
+			name = @names.sample
+			talkbox = `say "Random" -v "#{name}"`
 		when 'corral'
 			corral
 		when 'show voices'
 			show_voices
-		when *@colorful_language
-			print "Drink some run you sailor!\n"
+		when *colorful_language
+			print "Drink some rum you sailor!\n"
 		when 'exit'
 			print "Thank you for using talkbox\n"
 		else
-			print "Invalid Command: please type help\n"
+			talkbox = `say "#{command}" -v "#{name.strip}"`
 		end
 	end
 end
 
+# this is where the magic happens
 intro
 input
 main
-
-#read volume amt from args if volume_amt = 10
-#set_volume = `osascript -e 'set volume #{volume_amt}'`
-
-#voices = ["Albert", "Zarvox", "Alex", "Bruce", "Princess", "Ralph", "Vicki", "Victoria", "Whisper"]
-#random_voice = ["Albert", "Zarvox", "Alex", "Bruce", "Princess", "Ralph", "Vicki", "Victoria", "Whisper"].sample
-
-#read talk from args if present
-#talk = "Welcome to Machine Learning"
-
-#add flag for random
-#talkbox = `say "#{talk}" -v "#{voices[1]}"`
-#random_talkbox = `say "#{talk}" -v "#{random_voice}"`
-
-#talk like a [input]
