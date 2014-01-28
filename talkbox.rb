@@ -5,6 +5,21 @@
 @user = `id -un`
 @names = []
 
+def what_os
+	os = `uname -a`
+	current_os = os.strip.split(' ')
+	version = current_os.first
+	if version == 'Darwin'		### I think the darwin kernel is used by all OSX versions
+		return 'osx'
+	else
+		return 'linux'
+	end
+end
+
+def lin_talk(text)
+	`echo "#{text}" | espeak`
+end
+
 def intro
 	puts "***********************************************"
 	puts "Hi #{@user.strip}, I'm the #{$0} script.\n"
@@ -28,7 +43,11 @@ def corral
 	voice = 0
 	@voices.each do |name, saying|
 		print " #{name.strip} is speaking to you   [#{voice += 1}/#{@voices.count}]\n"
-		talkbox = `say "#{saying}" -v "#{name.strip}"`
+		if what_os == 'osx'
+			talkbox = `say "#{saying}" -v "#{name.strip}"`
+		else
+			lin_talk(saying)
+		end
 	end
 end
 
@@ -75,18 +94,35 @@ def main
 			if command[/([1-9]|10)$/] >= volume_amt
 				volume_amt = command[/([1-9]|10)$/]
 				set_volume = `osascript -e 'set volume #{volume_amt}'`
-				talkbox = `say "louder" -v "#{name.strip}"`
+				if what_os == 'osx'
+					talkbox = `say "louder" -v "#{name.strip}"`
+				else
+					lin_talk('louder')
+				end
 			else
 				volume_amt = command[/([1-9]|10)$/]
 				set_volume = `osascript -e 'set volume #{volume_amt}'`
-				talkbox = `say "softer" -v "#{name.strip}"`
+				if what_os == 'osx'
+					talkbox = `say "softer" -v "#{name.strip}"`
+				else
+					lin_talk('softer')
+				end
 			end
 		when 'use random'
 			name = @names.sample
-			talkbox = `say "Random" -v "#{name}"`
+			if what_os == 'osx'
+				talkbox = `say "Random" -v "#{name}"`
+			else
+				lin_talk('random')
+			end
+
 		when 'use ' + command.strip[4..-1]
 			name = command.strip[4..-1]
-			talkbox = `say "#{command.strip[4..-1]}" -v "#{name}"`
+			if what_os == 'osx'
+				talkbox = `say "#{command.strip[4..-1]}" -v "#{name}"`
+			else
+				lin_talk(command.strip[4..-1])
+			end
 		when 'corral'
 			corral
 		when 'show voices'
@@ -96,7 +132,11 @@ def main
 		when 'exit'
 			print "\nThank you for using talkbox\n"
 		else
-			talkbox = `say "#{command}" -v "#{name.strip}"`
+			if what_os == 'osx'
+				talkbox = `say "#{command}" -v "#{name.strip}"`
+			else
+				lin_talk(command)
+			end
 		end
 	end
 end
