@@ -6,14 +6,16 @@
 @names = []
 
 def intro
+	puts "***********************************************"
 	puts "Hi #{@user.strip}, I'm the #{$0} script.\n"
-	puts "*************************************"
+	puts "***********************************************"
 	puts "Welcome to Talkbox\n"
 	puts "type 'help' to get started\n"
+	puts "***********************************************"
 end
 
 def input
-	# parse names and sayings into hash
+	# parse names and sayings into hash (runs once)
 	@voices = Hash[*File.read('voices.txt').split(/# |\n/)]
 
 	@voices.each do |name, saying|
@@ -43,17 +45,31 @@ def main
 	command = ''
 	prompt = '$ '
 	name = 'Vicki'
-	volume_amt = `osascript -e 'set volume 5'`
+	volume_amt = `osascript -e 'set volume 1'`
 
 	# main program loop
 	until command == 'exit'
 		print prompt
 		command = STDIN.gets.chomp()
 
+		# fucking pirates always bee drinking man
+		if colorful_language.any?{|w| command =~ /#{w}/}
+			command = "drunk"
+		end
+
 		case command
 		when 'help' 
-			#must setup elaborate help case
-			puts 'Good luck with that buddy'
+			#whenever I sweat it fogs up my glasses
+			puts "usage: simply type something and press enter to get started\n\n"
+			puts "Talkbox commands available to you:\n"
+			puts "\thelp\t\tyour current position\n"
+			puts "\tset volume NUM\tvolume of voice, ranges from 1 to 10"
+			puts "\tuse random\tsample a random voice\n"
+			puts "\tcorral\t\tsample all the voices offered to you\n"
+			puts "\tshow voices\ta list of voices you can use\n"
+			puts "\tuse VOICE\tuse a voice of your choosing(must be valid voice from list)\n"
+			puts "\texit\t\tif your a party pooper"
+
 		when /^set volume ([1-9]|10)$/
 			# ehh the comparsion is just fucked....
 			if command[/([1-9]|10)$/] >= volume_amt
@@ -65,22 +81,20 @@ def main
 				set_volume = `osascript -e 'set volume #{volume_amt}'`
 				talkbox = `say "softer" -v "#{name.strip}"`
 			end
-		# breaks shit, must be clever here
-		#when /^use [a-zA-Z]{1,12}$/
-			# must only allow valid names, sys command return is good
-			#name = command[/[a-zA-Z]{1,12}$/]
-			#talkbox = `say "#{name.strip}" -v "#{name.strip}"`
-		when 'use Random'
+		when 'use random'
 			name = @names.sample
 			talkbox = `say "Random" -v "#{name}"`
+		when 'use ' + command.strip[4..-1]
+			name = command.strip[4..-1]
+			talkbox = `say "#{command.strip[4..-1]}" -v "#{name}"`
 		when 'corral'
 			corral
 		when 'show voices'
 			show_voices
-		when *colorful_language
+		when 'drunk'
 			print "Drink some rum you sailor!\n"
 		when 'exit'
-			print "Thank you for using talkbox\n"
+			print "\nThank you for using talkbox\n"
 		else
 			talkbox = `say "#{command}" -v "#{name.strip}"`
 		end
