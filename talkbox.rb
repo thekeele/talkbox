@@ -1,4 +1,4 @@
-#ruby talkbox for mac os x
+#ruby talkbox for mac os x (paritial linux support)
 #mRAK on the attACK
 
 # global variables
@@ -59,12 +59,14 @@ def show_voices
 end
 
 def main
-	# variables
-	colorful_language = ['fuck', 'shit', 'piss', 'cunt']
+	### I need more cuss words
+	colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
 	command = ''
 	prompt = '$ '
 	name = 'Vicki'
-	volume_amt = `osascript -e 'set volume 1'`
+	volume_amt = `osascript -e 'set volume 5'`
+
+	### during main program look allow up and down arrow to scroll through previous commands
 
 	# main program loop
 	until command == 'exit'
@@ -87,10 +89,12 @@ def main
 			puts "\tcorral\t\tsample all the voices offered to you\n"
 			puts "\tshow voices\ta list of voices you can use\n"
 			puts "\tuse VOICE\tuse a voice of your choosing(must be valid voice from list)\n"
+			puts "\tim dirty\tallow talkbox to use colorful language\n"
+			puts "\tgo to church\tcome bask in jesus's light my son\n"
 			puts "\texit\t\tif your a party pooper"
 
 		when /^set volume ([1-9]|10)$/
-			# ehh the comparsion is just fucked....
+			# ehh the comparsion is just fucked....louder or softer oh my!
 			if command[/([1-9]|10)$/] >= volume_amt
 				volume_amt = command[/([1-9]|10)$/]
 				set_volume = `osascript -e 'set volume #{volume_amt}'`
@@ -116,6 +120,7 @@ def main
 				lin_talk('random')
 			end
 
+		### typing use + invalid name will break system as invalid name becomes the default name used, must fix
 		when 'use ' + command.strip[4..-1]
 			name = command.strip[4..-1]
 			if what_os == 'osx'
@@ -123,6 +128,7 @@ def main
 			else
 				lin_talk(command.strip[4..-1])
 			end
+		### catch interrupt during corral, shouldn't make user listen to whole thing
 		when 'corral'
 			corral
 		when 'show voices'
@@ -131,6 +137,12 @@ def main
 			print "Drink some rum you sailor!\n"
 		when 'exit'
 			print "\nThank you for using talkbox\n"
+		when 'im dirty'
+			talkbox = `say "your such a whore bro" -v "#{name}"`
+			colorful_language = []
+		when 'go to church'
+			talkbox = `say "you made daddy really proud" -v "#{name}"`
+			colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
 		else
 			if what_os == 'osx'
 				talkbox = `say "#{command}" -v "#{name.strip}"`
