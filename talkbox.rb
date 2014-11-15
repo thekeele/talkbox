@@ -89,8 +89,8 @@ def main
 			puts "\tcorral\t\tsample all the voices offered to you\n"
 			puts "\tshow voices\ta list of voices you can use\n"
 			puts "\tuse VOICE\tuse a voice of your choosing(must be valid voice from list)\n"
-			puts "\tuse dirty\tallow talkbox to use colorful language\n"
-			puts "\tuse clean\tremove cuss words from talkbox\n"
+			puts "\tdirty talk\tallow talkbox to use colorful language\n"
+			puts "\tclean talk\tremove cuss words from talkbox\n"
 			puts "\texit\t\tif your a party pooper"
 
 		when /^set volume ([1-9]|10)$/
@@ -137,10 +137,10 @@ def main
 			print "Drink some rum you sailor!\n"
 		when 'exit'
 			print "\nThank you for using talkbox\n"
-		when 'use dirty'
+		when 'dirty talk'
 			talkbox = `say "your such a whore bro" -v "#{name}"`
 			colorful_language = []
-		when 'use clean'
+		when 'clean talk'
 			talkbox = `say "you made daddy really proud" -v "#{name}"`
 			colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
 		else
