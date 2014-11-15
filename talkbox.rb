@@ -66,7 +66,7 @@ def main
 	name = 'Vicki'
 	volume_amt = `osascript -e 'set volume 5'`
 
-	### during main program look allow up and down arrow to scroll through previous commands
+	### during main program loop allow up and down arrow to scroll through previous commands
 
 	# main program loop
 	until command == 'exit'
@@ -89,8 +89,8 @@ def main
 			puts "\tcorral\t\tsample all the voices offered to you\n"
 			puts "\tshow voices\ta list of voices you can use\n"
 			puts "\tuse VOICE\tuse a voice of your choosing(must be valid voice from list)\n"
-			puts "\tim dirty\tallow talkbox to use colorful language\n"
-			puts "\tgo to church\tcome bask in jesus's light my son\n"
+			puts "\tuse dirty\tallow talkbox to use colorful language\n"
+			puts "\tuse clean\tremove cuss words from talkbox\n"
 			puts "\texit\t\tif your a party pooper"
 
 		when /^set volume ([1-9]|10)$/
@@ -137,10 +137,10 @@ def main
 			print "Drink some rum you sailor!\n"
 		when 'exit'
 			print "\nThank you for using talkbox\n"
-		when 'im dirty'
+		when 'use dirty'
 			talkbox = `say "your such a whore bro" -v "#{name}"`
 			colorful_language = []
-		when 'go to church'
+		when 'use clean'
 			talkbox = `say "you made daddy really proud" -v "#{name}"`
 			colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
 		else
