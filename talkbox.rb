@@ -1,45 +1,66 @@
-#ruby talkbox for mac os x (paritial linux support)
+#!/usr/bin/env ruby
+
+#ruby talkbox for mac osx (untested linux support)
 #mRAK on the attACK
 
 # global variables
 @user = `id -un`
 @names = []
 
+# welcome the user to talkbox
+def intro
+    puts "************************************************"
+    puts "Hi #{@user.strip}, I'm the #{$0} script\n"
+    puts "************************************************"
+    puts "\tWelcome to Talkbox\n"
+    puts "\ttype 'help' to get started\n"
+    puts "************************************************"
+end
+
+# whenever I sweat it fogs up my glasses
+def help
+    puts "usage: simply type something and press enter to get started\n\n"
+    puts "Talkbox commands available to you:\n"
+    puts "\thelp\t\tyour current position\n"
+    puts "\tset volume NUM\tvolume of voice, ranges from 1 to 10"
+    puts "\tuse random\tsample a random voice\n"
+    puts "\tcorral\t\tsample all the voices offered to you\n"
+    puts "\tshow voices\ta list of voices you can use\n"
+    puts "\tuse VOICE\tuse a voice of your choosing(must be valid voice from list)\n"
+    puts "\tdirty talk\tallow talkbox to use colorful language\n"
+    puts "\tclean talk\tremove cuss words from talkbox\n"
+    puts "\texit\t\tif your a party pooper"
+end
+
+# read in voice file and fill array of names
+def input
+    # parse names and sayings into hash (runs once)
+    @voices = Hash[*File.read('voices.txt').split(/# |\n/)]
+
+    @voices.each do |name, saying|
+        @names.push(name.strip)
+    end
+end
+
+# determine what OS script is running on
 def what_os
 	os = `uname -a`
 	current_os = os.strip.split(' ')
 	version = current_os.first
-	if version == 'Darwin'		### I think the darwin kernel is used by all OSX versions
+	if version == 'Darwin'
 		return 'osx'
 	else
 		return 'linux'
 	end
 end
 
+# talk command for linux systems
 def lin_talk(text)
 	`echo "#{text}" | espeak`
 end
 
-def intro
-	puts "***********************************************"
-	puts "Hi #{@user.strip}, I'm the #{$0} script.\n"
-	puts "***********************************************"
-	puts "Welcome to Talkbox\n"
-	puts "type 'help' to get started\n"
-	puts "***********************************************"
-end
-
-def input
-	# parse names and sayings into hash (runs once)
-	@voices = Hash[*File.read('voices.txt').split(/# |\n/)]
-
-	@voices.each do |name, saying|
-		@names.push(name.strip)
-	end
-end
-
+# showcase of all the voices OS has to offer
 def corral
-	# showcase of all the voices OS has to offter
 	voice = 0
 	@voices.each do |name, saying|
 		print " #{name.strip} is speaking to you   [#{voice += 1}/#{@voices.count}]\n"
@@ -51,15 +72,15 @@ def corral
 	end
 end
 
+# display all voices for the user
 def show_voices
-	# display all voices for the user
 	@voices.each do |name, saying|
 		print name.strip + "\n"
 	end
 end
 
 def main
-	### I need more cuss words
+	# setup initial environment with clean talk, Vicki, and moderate volume
 	colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
 	command = ''
 	prompt = '$ '
@@ -72,6 +93,7 @@ def main
 	until command == 'exit'
 		print prompt
 		command = STDIN.gets.chomp()
+        print command
 
 		# fucking pirates always bee drinking man
 		if colorful_language.any?{|w| command =~ /#{w}/}
@@ -79,22 +101,10 @@ def main
 		end
 
 		case command
-		when 'help' 
-			#whenever I sweat it fogs up my glasses
-			puts "usage: simply type something and press enter to get started\n\n"
-			puts "Talkbox commands available to you:\n"
-			puts "\thelp\t\tyour current position\n"
-			puts "\tset volume NUM\tvolume of voice, ranges from 1 to 10"
-			puts "\tuse random\tsample a random voice\n"
-			puts "\tcorral\t\tsample all the voices offered to you\n"
-			puts "\tshow voices\ta list of voices you can use\n"
-			puts "\tuse VOICE\tuse a voice of your choosing(must be valid voice from list)\n"
-			puts "\tdirty talk\tallow talkbox to use colorful language\n"
-			puts "\tclean talk\tremove cuss words from talkbox\n"
-			puts "\texit\t\tif your a party pooper"
-
+		when 'help'
+            help
 		when /^set volume ([1-9]|10)$/
-			# ehh the comparsion is just fucked....louder or softer oh my!
+			# ehh the comparison is just fucked....louder or softer oh my!
 			if command[/([1-9]|10)$/] >= volume_amt
 				volume_amt = command[/([1-9]|10)$/]
 				set_volume = `osascript -e 'set volume #{volume_amt}'`
