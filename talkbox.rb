@@ -42,7 +42,7 @@ end
 # read in voice file and fill array of @names
 def input
     # parse @names and sayings into hash (runs once)
-    @voices = Hash[*File.read('voices.txt').split(/# |\n/)]
+    @voices = Hash[*File.read('/Users/MarksMacMachine/dev/talkbox/voices.txt').split(/# |\n/)]
 
     @voices.each do |name, saying|
         @names.push(name.strip)
