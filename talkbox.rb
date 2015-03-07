@@ -93,7 +93,6 @@ def main
 	until command == 'exit'
 		print prompt
 		command = STDIN.gets.chomp()
-        print command
 
 		# fucking pirates always bee drinking man
 		if colorful_language.any?{|w| command =~ /#{w}/}
@@ -146,7 +145,7 @@ def main
 		when 'drunk'
 			print "Drink some rum you sailor!\n"
 		when 'exit'
-			print "\nThank you for using talkbox\n"
+			print "\nThank you for using talkbox, #{@user.strip}\n"
 		when 'dirty talk'
 			talkbox = `say "your such a whore bro" -v "#{name}"`
 			colorful_language = []
