@@ -132,9 +132,18 @@ end
 def main
 	# setup initial environment with clean talk, Vicki, and moderate volume
 	colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
-	command = ''
 	prompt = '$ '
 	volume_amt = `osascript -e 'set volume 5'`
+
+    if ARGV[0] != nil
+        command = ARGV[0]
+        print "#{@name} wishes #{command} to you!\n"
+        osx_talk(command, @name)
+        command = 'exit'
+    else
+        intro
+        command = ''
+    end
 
 	### during main program loop allow up and down arrow to scroll through previous commands
     ### catch interrupt during corral, shouldn't make user listen to whole thing
@@ -182,6 +191,5 @@ def main
 end
 
 # this is where the magic happens
-intro
 input
 main
