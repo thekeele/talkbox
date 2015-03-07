@@ -5,8 +5,10 @@
 
 # global variables
 @user = `id -un`
-@names = []
 @name = 'Vicki'
+@names = []
+@os = ''
+@volume = '5'
 
 # welcome the user to talkbox
 def intro
@@ -30,9 +32,9 @@ def help
     puts "Talkbox commands available to you:\n"
     puts "\thelp\t\tyour current position\n"
     puts "\tset volume NUM\tvolume of voice, ranges from 1 to 10"
-    puts "\tuse random\tsample a random voice\n"
     puts "\tcorral\t\tsample all the voices offered to you\n"
     puts "\tshow voices\ta list of voices you can use\n"
+    puts "\tuse random\tsample a random voice\n"
     puts "\tuse VOICE\tuse a voice of your choosing(must be valid voice from list)\n"
     puts "\tdirty talk\tallow talkbox to use colorful language\n"
     puts "\tclean talk\tremove cuss words from talkbox\n"
@@ -54,6 +56,7 @@ def what_os
 	os = `uname -a`
 	current_os = os.strip.split(' ')
 	version = current_os.first
+
 	if version == 'Darwin'
 		return 'osx'
 	else
@@ -61,14 +64,28 @@ def what_os
 	end
 end
 
-# talk command for linux systems
-def lin_talk(text)
-	`echo "#{text}" | espeak`
+def talkbox_talk(text, name)
+    if @os == 'osx'
+        `say "#{text}" -v "#{name.strip}"`
+    else
+        `echo "#{text}" | espeak`
+    end
 end
 
-# talk command for linux systems
-def osx_talk(text, name)
-    `say "#{text}" -v "#{name.strip}"`
+def set_volume(command)
+    new_volume = command[/(10|[1-9])$/].to_i
+    set_volume = `osascript -e 'set volume #{new_volume}'`
+    @volume = @volume.to_i
+
+    if new_volume > @volume
+        talkbox_talk('louder', @name)
+    elsif new_volume == @volume
+        ;
+    else
+        talkbox_talk('softer', @name)
+    end
+
+    @volume = new_volume
 end
 
 # showcase of all the voices OS has to offer
@@ -76,11 +93,7 @@ def corral
 	voice = 0
 	@voices.each do |name, saying|
 		print " #{name.strip} says: #{saying}   [#{voice += 1}/#{@voices.count}]\n"
-		if what_os == 'osx'
-            osx_talk(saying, name.strip)
-		else
-			lin_talk(saying)
-		end
+		talkbox_talk(saying, name.strip)
 	end
 end
 
@@ -91,54 +104,27 @@ def show_voices
 	end
 end
 
-def set_volume(command, volume_amt)
-    if command[/([1-9]|10)$/] >= volume_amt
-        volume_amt = command[/([1-9]|10)$/]
-        set_volume = `osascript -e 'set volume #{volume_amt}'`
-        if what_os == 'osx'
-            osx_talk(command, @name)
-        else
-            lin_talk('louder')
-        end
-    else
-        volume_amt = command[/([1-9]|10)$/]
-        set_volume = `osascript -e 'set volume #{volume_amt}'`
-        if what_os == 'osx'
-            osx_talk(command, @name)
-        else
-            lin_talk('softer')
-        end
-    end
-end
-
 def use_random
     @name = @names.sample
-    if what_os == 'osx'
-        osx_talk("Random", @name)
-    else
-        lin_talk('random')
-    end
+    talkbox_talk('Random', @name)
 end
 
 def use_name(command)
     @name = command.strip[4..-1]
-    if what_os == 'osx'
-        osx_talk(command, @name)
-    else
-        lin_talk(command)
-    end
+    talkbox_talk(command, @name)
 end
 
 def main
 	# setup initial environment with clean talk, Vicki, and moderate volume
 	colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
 	prompt = '$ '
-	volume_amt = `osascript -e 'set volume 5'`
+    @os = what_os
+    set_volume(@volume)
 
     if ARGV[0] != nil
         command = ARGV[0]
         print "#{@name} wishes #{command} to you!\n"
-        osx_talk(command, @name)
+        talkbox_talk(command, @name)
         command = 'exit'
     else
         intro
@@ -161,31 +147,27 @@ def main
 		when 'help'
             help
 		when /^set volume ([1-9]|10)$/
-            set_volume(command, volume_amt)
-		when 'use random'
-            use_random
-		when /^use [a-zA-Z]+$/
-            use_name(command)
+            set_volume(command)
 		when 'corral'
 			corral
 		when 'show voices'
 			show_voices
+        when 'use random'
+            use_random
+        when /^use [a-zA-Z]+$/
+            use_name(command)
 		when 'drunk'
 			print "Drink some rum you sailor!\n"
-		when 'exit'
-            outro
 		when 'dirty talk'
-            osx_talk("your such a whore bro", @name)
+            talkbox_talk("your such a whore bro", @name)
 			colorful_language = []
 		when 'clean talk'
-            osx_talk("you made daddy really proud", @name)
+            talkbox_talk("you made daddy really proud", @name)
 			colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
+        when 'exit'
+            outro
 		else
-			if what_os == 'osx'
-				osx_talk(command, @name)
-			else
-				lin_talk(command)
-			end
+			talkbox_talk(command, @name)
 		end
 	end
 end
