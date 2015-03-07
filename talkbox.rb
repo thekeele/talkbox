@@ -18,6 +18,12 @@ def intro
     puts "************************************************"
 end
 
+def outro
+    puts "************************************************"
+    print "Thank you for using talkbox, #{@user.strip}\n"
+    puts "************************************************"
+end
+
 # whenever I sweat it fogs up my glasses
 def help
     puts "usage: simply type something and press enter to get started\n\n"
@@ -158,7 +164,7 @@ def main
 		when 'drunk'
 			print "Drink some rum you sailor!\n"
 		when 'exit'
-			print "\nThank you for using talkbox, #{@user.strip}\n"
+            outro
 		when 'dirty talk'
             osx_talk("your such a whore bro", @name)
 			colorful_language = []
