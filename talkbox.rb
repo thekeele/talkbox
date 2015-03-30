@@ -45,8 +45,10 @@ end
 
 # read in voice file and fill array of @names
 def input
-    # parse @names and sayings into hash (runs once)
-    @voices = Hash[*File.read('/Users/MarksMacMachine/dev/talkbox/voices.txt').split(/# |\n/)]
+    # split each line by # char or newline char into array
+    # splat operator converts array into arguments
+    # hash is created from even number of arguments
+    @voices = Hash[*File.read('voices.txt').split(/# |\n/)]
 
     @voices.each do |name, saying|
         @names.push(name.strip)
@@ -66,6 +68,7 @@ def what_os
 	end
 end
 
+# executes talk command with text and name of speaker
 def talkbox_talk(text, name)
     if @os == 'osx'
         `say "#{text}" -v "#{name.strip}"`
@@ -81,10 +84,9 @@ def set_volume(command)
 
     if new_volume > @volume
         talkbox_talk('louder', @name)
-    elsif new_volume == @volume
-        ;
-    else
+    elsif new_volume < @volume
         talkbox_talk('softer', @name)
+    else
     end
 
     @volume = new_volume
