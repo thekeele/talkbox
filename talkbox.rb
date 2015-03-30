@@ -96,7 +96,7 @@ end
 def corral
 	voice = 0
 	@voices.each do |name, saying|
-		print " #{name.strip} says: #{saying}   [#{voice += 1}/#{@voices.count}]\n"
+		puts " #{name.strip} says: #{saying}   [#{voice += 1}/#{@voices.count}]"
 		talkbox_talk(saying, name.strip)
 	end
 end
@@ -104,7 +104,7 @@ end
 # display all voices for the user
 def show_voices
 	@voices.each do |name, saying|
-		print name.strip + "\n"
+		puts name.strip
 	end
 end
 
@@ -119,20 +119,21 @@ def use_name(command)
 end
 
 def main
-	# setup initial environment with clean talk, Vicki, and moderate volume
-	colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
-	prompt = '$ '
+	# determine OS and set moderate volume
     @os = what_os
     set_volume(@volume)
 
     if ARGV[0] != nil
+        # talk argument and exit
         command = ARGV[0]
         print "#{@name} wishes #{command} to you!\n"
         talkbox_talk(command, @name)
         command = 'exit'
     else
+        # prepare interactive prompt
         intro
-        command = ''
+        prompt = '$ '
+        colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
     end
 
 	### during main program loop allow up and down arrow to scroll through previous commands
