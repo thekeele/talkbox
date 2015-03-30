@@ -3,8 +3,10 @@
 #ruby talkbox for mac osx (untested linux support)
 #mRAK on the attACK
 
-# global variables
-@user = `id -un`
+# CONST name of user running script
+USER = `id -un`
+
+# instance variables for self
 @name = 'Vicki'
 @names = []
 @os = ''
@@ -13,16 +15,16 @@
 # welcome the user to talkbox
 def intro
     puts "************************************************"
-    puts "Hi #{@user.strip}, I'm the #{$0} script\n"
+    puts "Hi #{USER.strip}, I'm the #{$0} script"
     puts "************************************************"
-    puts "\tWelcome to Talkbox\n"
-    puts "\ttype 'help' to get started\n"
+    puts "\tWelcome to Talkbox"
+    puts "\ttype 'help' to get started"
     puts "************************************************"
 end
 
 def outro
     puts "************************************************"
-    print "Thank you for using talkbox, #{@user.strip}\n"
+    puts "Thank you for using talkbox, #{USER.strip}"
     puts "************************************************"
 end
 
