@@ -92,12 +92,30 @@ def set_volume(command)
     @volume = new_volume
 end
 
+def quit?
+  begin
+    while char = STDIN.read_nonblock(1)
+      return true if char == 'Q'
+    end
+    false
+  rescue Errno::EINTR
+    false
+  rescue Errno::EAGAIN
+    puts 'Errno::EAGAIN: Resource temporarily unavailable'
+    false
+  rescue EOFError
+    true
+  end
+end
+
 # showcase of all the voices OS has to offer
 def corral
+    puts 'Press CTRL+D to Exit'
 	voice = 0
 	@voices.each do |name, saying|
 		puts " #{name.strip} says: #{saying}   [#{voice += 1}/#{@voices.count}]"
 		talkbox_talk(saying, name.strip)
+        break if quit?
 	end
 end
 
@@ -123,26 +141,28 @@ def main
     @os = what_os
     set_volume(@volume)
 
+    # Initialize variables
+    prompt = '$ '
+    colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
+
     if ARGV[0] != nil
         # talk argument and exit
         command = ARGV[0]
-        print "#{@name} wishes #{command} to you!\n"
+        puts "#{@name} wishes #{command} to you!"
         talkbox_talk(command, @name)
         command = 'exit'
     else
         # prepare interactive prompt
         intro
-        prompt = '$ '
-        colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
     end
 
 	### during main program loop allow up and down arrow to scroll through previous commands
-    ### catch interrupt during corral, shouldn't make user listen to whole thing
 
 	# main program loop
 	until command == 'exit'
-		print prompt
-		command = STDIN.gets.chomp()
+        command = nil
+        print prompt
+        command = STDIN.gets.chomp()
 
 		if colorful_language.any?{|w| command =~ /#{w}/}
 			command = "drunk"
@@ -162,7 +182,7 @@ def main
         when /^use [a-zA-Z]+$/
             use_name(command)
 		when 'drunk'
-			print "Drink some rum you sailor!\n"
+			puts "Drink some rum you sailor!"
 		when 'dirty talk'
             talkbox_talk("your such a whore bro", @name)
 			colorful_language = []
