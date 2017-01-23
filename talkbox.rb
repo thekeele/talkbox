@@ -1,35 +1,53 @@
-#!/usr/bin/env ruby
+class Talkbox
+  # instance variables for self
+  def initialize()
+    # CONST name of user running script
+    user = `id -un`
+    @user = user.chomp
 
-#ruby talkbox for mac osx (untested linux support)
-#mRAK on the attACK
+    os = `uname -a`
+    current_os = os.strip.split(' ')
+    version = current_os.first
 
-# CONST name of user running script
-USER = `id -un`
+    if version == 'Darwin'
+      @os = 'osx'
+    else
+      @os = 'linux'
+    end
 
-# instance variables for self
-@name = 'Vicki'
-@names = []
-@os = ''
-@volume = '5'
+    @name = ''
+    @names = []
 
-# welcome the user to talkbox
-def intro
+    # split each line by # char or newline char into array
+    # splat operator converts array into arguments
+    # hash is created from even number of arguments
+    @voices = Hash[*File.read('voices.txt').split(/# |\n/)]
+
+    @voices.each do |name, saying|
+      @names.push(name.strip)
+    end
+
+    @volume = '5'
+  end
+
+  # welcome the user to talkbox
+  def intro
     puts "************************************************"
-    puts "Hi #{USER.strip}, I'm the #{$0} script"
+    puts "Hi #{ @user.strip }, I'm the #{ $0 } script"
     puts "************************************************"
     puts "\tWelcome to Talkbox"
     puts "\ttype 'help' to get started"
     puts "************************************************"
-end
+  end
 
-def outro
+  def outro
     puts "************************************************"
-    puts "Thank you for using talkbox, #{USER.strip}"
+    puts "Thank you for using talkbox, #{ @user.strip }"
     puts "************************************************"
-end
+  end
 
-# whenever I sweat it fogs up my glasses
-def help
+  # whenever I sweat it fogs up my glasses
+  def help
     puts "usage: simply type something and press enter to get started\n\n"
     puts "Talkbox commands available to you:\n"
     puts "\thelp\t\tyour current position\n"
@@ -41,162 +59,79 @@ def help
     puts "\tdirty talk\tallow talkbox to use colorful language\n"
     puts "\tclean talk\tremove cuss words from talkbox\n"
     puts "\texit\t\tif your a party pooper"
-end
+  end
 
-# read in voice file and fill array of @names
-def input
-    # split each line by # char or newline char into array
-    # splat operator converts array into arguments
-    # hash is created from even number of arguments
-    @voices = Hash[*File.read('voices.txt').split(/# |\n/)]
-
-    @voices.each do |name, saying|
-        @names.push(name.strip)
-    end
-end
-
-# determine what OS script is running on
-def what_os
-	os = `uname -a`
-	current_os = os.strip.split(' ')
-	version = current_os.first
-
-	if version == 'Darwin'
-		return 'osx'
-	else
-		return 'linux'
-	end
-end
-
-# executes talk command with text and name of speaker
-def talkbox_talk(text, name)
+  # executes talk command with text and name of speaker
+  def talk(text, name)
     if @os == 'osx'
-        `say "#{text}" -v "#{name.strip}"`
+      `say "#{ text }" -v "#{ name.strip }"`
     else
-        `echo "#{text}" | espeak`
+      `echo "#{ text }" | espeak`
     end
-end
+  end
 
-def set_volume(command)
+  def volume(command)
     new_volume = command[/(10|[1-9])$/].to_i
-    set_volume = `osascript -e 'set volume #{new_volume}'`
+    set_volume = `osascript -e 'set volume #{ new_volume }'`
     @volume = @volume.to_i
 
     if new_volume > @volume
-        talkbox_talk('louder', @name)
+      self.talk('louder', @name)
     elsif new_volume < @volume
-        talkbox_talk('softer', @name)
-    else
+      self.talk('softer', @name)
     end
 
     @volume = new_volume
-end
+  end
 
-def quit?
-  begin
-    while char = STDIN.read_nonblock(1)
-      return true if char == 'Q'
+  def quit?
+    begin
+      while char = STDIN.read_nonblock(1)
+        return true if char == 'Q'
+      end
+      false
+    rescue Errno::EINTR
+      false
+    rescue Errno::EAGAIN
+      puts 'Errno::EAGAIN: Resource temporarily unavailable'
+      false
+    rescue EOFError
+      true
     end
-    false
-  rescue Errno::EINTR
-    false
-  rescue Errno::EAGAIN
-    puts 'Errno::EAGAIN: Resource temporarily unavailable'
-    false
-  rescue EOFError
-    true
+  end
+
+  # showcase of all the voices OS has to offer
+  def corral
+    puts 'Press CTRL+D to Exit'
+    voice = 0
+
+    @voices.each do |name, saying|
+      puts " #{ name.strip } says: #{ saying }   [#{ voice += 1 }/#{ @voices.count }]"
+
+      talkbox_talk(saying, name.strip)
+
+      break if quit?
+    end
+  end
+
+  # display all voices for the user
+  def voices
+    @voices.each do |name, saying|
+      puts name.strip
+    end
+  end
+
+  def random
+    @name = @names.sample
+
+    self.talk('Random', @name)
+  end
+
+  def name(command)
+    @name = command.strip[4..-1]
+
+    self.talk(command, @name)
+
+    return @name
   end
 end
-
-# showcase of all the voices OS has to offer
-def corral
-    puts 'Press CTRL+D to Exit'
-	voice = 0
-	@voices.each do |name, saying|
-		puts " #{name.strip} says: #{saying}   [#{voice += 1}/#{@voices.count}]"
-		talkbox_talk(saying, name.strip)
-        break if quit?
-	end
-end
-
-# display all voices for the user
-def show_voices
-	@voices.each do |name, saying|
-		puts name.strip
-	end
-end
-
-def use_random
-    @name = @names.sample
-    talkbox_talk('Random', @name)
-end
-
-def use_name(command)
-    @name = command.strip[4..-1]
-    talkbox_talk(command, @name)
-end
-
-def main
-	# determine OS and set moderate volume
-    @os = what_os
-    set_volume(@volume)
-
-    # Initialize variables
-    prompt = '$ '
-    colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
-
-    if ARGV[0] != nil
-        # talk argument and exit
-        command = ARGV[0]
-        puts "#{@name} wishes #{command} to you!"
-        talkbox_talk(command, @name)
-        command = 'exit'
-    else
-        # prepare interactive prompt
-        intro
-    end
-
-	### during main program loop allow up and down arrow to scroll through previous commands
-
-	# main program loop
-	until command == 'exit'
-        command = nil
-        print prompt
-        command = STDIN.gets.chomp()
-
-		if colorful_language.any?{|w| command =~ /#{w}/}
-			command = "drunk"
-		end
-
-		case command
-		when 'help'
-            help
-		when /^set volume ([1-9]|10)$/
-            set_volume(command)
-		when 'corral'
-			corral
-		when 'show voices'
-			show_voices
-        when 'use random'
-            use_random
-        when /^use [a-zA-Z]+$/
-            use_name(command)
-		when 'drunk'
-			puts "Drink some rum you sailor!"
-		when 'dirty talk'
-            talkbox_talk("your such a whore bro", @name)
-			colorful_language = []
-		when 'clean talk'
-            talkbox_talk("you made daddy really proud", @name)
-			colorful_language = ['fuck', 'shit', 'piss', 'cunt', 'bitch', 'whore', 'slut', 'damn', 'penis', 'pussy']
-        when 'exit'
-            outro
-		else
-			talkbox_talk(command, @name)
-		end
-	end
-end
-
-# this is where the magic happens
-input
-main
